@@ -2,6 +2,7 @@
 points (any dimension).
 """
 from math import sqrt
+from math import ceil
 from geo.quadrant import Quadrant
 
 
@@ -30,6 +31,28 @@ class Point:
         return copy of given point.
         """
         return Point(list(self.coordinates))
+
+
+    def hasher(self, precision, num):
+        """
+        Return a hash
+        """
+        if num == 0:
+            x1 = ceil(self.coordinates[0]/precision)
+            y1 = ceil(self.coordinates[1]/precision)
+            return Point([x1, y1])
+        if num == 1:
+            x2 = ceil((self.coordinates[0]+precision/2)/precision)
+            y2 = ceil(self.coordinates[1]/precision)
+            return Point([x2, y2])
+        if num == 2:
+            x3 = ceil(self.coordinates[0]/precision)
+            y3 = ceil((self.coordinates[1] + precision/2)/precision)
+            return Point([x3, y3])
+        if num == 3:
+            x4 = ceil((self.coordinates[0]+precision/2)/precision)
+            y4 = ceil((self.coordinates[1] + precision/2)/precision)
+            return Point([x4, y4])
 
     def distance_to(self, other):
         """

@@ -1,36 +1,40 @@
-def hasher(points, t):
-    hash1 = dict()
-    hash2 = dict()
-    hash3 = dict()
-    hash4 = dict()
+"""
+Hash module for the iterator on the hashed segments.
+"""
+from geo.segment import Segment
+
+def hashed_segments(points, precision):
+    """
+    Return hashed tables for a given precision
+    """
+    tables = [dict(), dict(), dict(), dict()]
+    collision = False
     for point in points:
-        x1 = round(point.coordinates[0]/t)
-        y1= round(point.coordinates[1]/t)
-        hash1[(x1, y1)].append(point)
+        for i in range(4):
+            carre = point.hasher(precision, i)
+            if carre not in tables[i]:
+                tables[i][carre] = []
+            else:
+                collision = True
+            tables[i][carre].append(point)
+    return tables, collision
 
-        x2 = round((point.coordinates[0] + t/2) / t)
-        y2 = round(point.coordinates[1] / t)
-        hash2[(x2, y2)].append(point)
-
-        x3 = round(point.coordinates[0] / t)
-        y3 = round((point.coordinates[1] + t/2) / t)
-        hash3[(x3, y3)].append(point)
-
-        x4 = round((point.coordinates[0] + t/2) / t)
-        y4 = round((point.coordinates[1] + t/2) / t)
-        hash4[(x4, y4)].append(point)
-
-    return hash1, hash2, hash3, hash4
-
-def deuxpointsenCollision(hash):
-    pass
-
-def ordered_segments(points):
-    t = 1
-    tables = list()
-    tables.append(hasher(points, t))
-    test = deuxpointsenCollision(tables[len(tables)-1])
-    while test:
-        t = t/2
-        tables.append(hasher(points,t))
-        test = deuxpointsenCollision(tables[len(tables) - 1])
+def hashed_iterator(points):
+    """
+    Returns iterator on the hashed segments
+    """
+    tables = []
+    precision = 1
+    tables_hash, collision = hashed_segments(points, precision)
+    tables.append(tables_hash)
+    while collision is True:
+        precision = precision/2
+        tables_hash, collision = hashed_segments(points, precision)
+        tables.append(tables_hash)
+    for table in reversed(tables):
+        for table_hash in table:
+            for carre in table_hash.keys():
+                length = len(table_hash[carre])
+                for i in range(length):
+                    for j in range(i+1, length):
+                        yield Segment([table_hash[carre][i], table_hash[carre][j]])

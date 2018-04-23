@@ -5,14 +5,19 @@ display given segment files
 import sys
 from geo.segment import load_segments
 from geo.tycat import tycat
+from geo.graph import Graph
+from geo.hash import hashed_iterator
 
 def display(filename):
     """
     load segment file, get back connexity, get even degrees, display eulerian path.
     """
     segments = load_segments(filename)
+    g = Graph(segments)
+    tycat(g)
     print("{}: nous avons {} segments".format(filename, len(segments)))
-    tycat(segments)
+    tycat(list(hashed_iterator(g.vertices.keys())))
+    #tycat(g.quadratic_iterator())
 
 def main():
     """

@@ -2,10 +2,10 @@
 graph structure
 """
 from itertools import chain, combinations
+from geo.hash import hashed_iterator
 from geo.quadrant import Quadrant
-from geo.union import UnionFind
 from geo.segment import Segment
-from geo.hash import ordered_segments
+from geo.union import UnionFind
 
 class Graph:
     """
@@ -36,6 +36,17 @@ class Graph:
         edges = (e for (p, edges) in self.vertices.items() for e in edges if e.endpoints[0] == p)
         return "\n".join(c.svg_content() for c in chain(self.vertices.keys(), edges))
 
+    def quadratic_iterator(self):
+        """
+        Iterator on a quadratic number of segments
+        """
+        points = list(self.vertices.keys())
+        segments = []
+        length = len(self.vertices)
+        for i in range(length):
+            for j in range(i + 1,length):
+                segments.append(Segment([points[i], points[j]]))
+        return sorted(segments, key=lambda segment: segment.length())
 
     def reconnect(self, hash_points):
         """
@@ -43,8 +54,12 @@ class Graph:
         if hash_points is true then use hashed segments iterator
         else use quadratic segments iterator.
         """
+        if hash_points == True:
+            iterator = hashed_iterator(self.vertices.keys())
+        else:
+            iterator = self.quadratic_iterator()
         C = UnionFind(self.vertices.keys())
-        for segment in ordered_segments(self.vertices.keys()):
+        for segment in iterator:
             compp1 = C.find(segment.endpoints[0])
             compp2 = C.find(segment.endpoints[0])
             if compp1 != compp2:
@@ -61,10 +76,14 @@ class Graph:
         if hash_points is true then use hashed segments iterator
         else use quadratic segments iterator.
         """
+        if hash_points == True:
+            iterator = hashed_iterator(self.vertices.keys())
+        else:
+            iterator = self.quadratic_iterator()
         sommets_impairs = list(e for e in self.vertices.values() if len(e) % 2 == 1)
         impairs = len(sommets_impairs)
         while impairs != 0:
-            for segment in ordered_segments(self.vertices.keys()):
+            for segment in iterator:
                 if segment.endpoints[0] in sommets_impairs and segment.endpoints[1] in sommets_impairs:
                     self.vertices[segment.endpoints[0]].append(segment)
                     self.vertices[segment.endpoints[1]].append(segment)
