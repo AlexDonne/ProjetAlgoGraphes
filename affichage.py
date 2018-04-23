@@ -15,9 +15,9 @@ def display(filename):
     segments = load_segments(filename)
     g = Graph(segments)
     tycat(g)
-    print("{}: nous avons {} segments".format(filename, len(segments)))
-    tycat(list(hashed_iterator(g.vertices.keys())))
-    #tycat(g.quadratic_iterator())
+    #print("{}: nous avons {} segments".format(filename, len(segments)))
+    g.reconnect(True)
+    tycat(g)
 
 def main():
     """

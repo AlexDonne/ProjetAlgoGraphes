@@ -44,7 +44,7 @@ class Graph:
         segments = []
         length = len(self.vertices)
         for i in range(length):
-            for j in range(i + 1,length):
+            for j in range(i + 1, length):
                 segments.append(Segment([points[i], points[j]]))
         return sorted(segments, key=lambda segment: segment.length())
 
@@ -54,21 +54,58 @@ class Graph:
         if hash_points is true then use hashed segments iterator
         else use quadratic segments iterator.
         """
-        if hash_points == True:
+        if hash_points:
             iterator = hashed_iterator(self.vertices.keys())
         else:
             iterator = self.quadratic_iterator()
-        C = UnionFind(self.vertices.keys())
+        connected_components = self.connected_components()
         for segment in iterator:
-            compp1 = C.find(segment.endpoints[0])
-            compp2 = C.find(segment.endpoints[0])
+            compp1 = connected_components.find(segment.endpoints[0])
+            compp2 = connected_components.find(segment.endpoints[1])
             if compp1 != compp2:
                 self.vertices[segment.endpoints[0]].append(segment)
                 self.vertices[segment.endpoints[1]].append(segment)
-                C.union(compp1, compp2)
-            if len(C) == 1:
+                connected_components.union(compp1, compp2)
+            if len(connected_components) == 1:
                 return
 
+    def top_not_marked(self, tops_dict):
+        """
+        Retourne le premier sommet non marqué
+        """
+        for top, marked in tops_dict.items():
+            if marked is False:
+                return top
+        return None
+
+    def connected_components(self):
+        """
+        Retoure l'union find comportant les composantes connexes
+        """
+        connected_components = UnionFind()
+        tops_dict = dict()
+        for key in self.vertices.keys():
+            tops_dict[key] = False
+        top = self.top_not_marked(tops_dict)
+        while top is not None:
+            connected_components.add(top)
+            self.parcours(top, tops_dict, connected_components)
+            top = self.top_not_marked(tops_dict)
+        return connected_components
+
+    def parcours(self, top, tops_dict, connected_components):
+        """
+        Parcours le graphe à partir d'un sommet et marque les sommets traversés
+        Ajoute chaque sommet à l'unionfind et unit tout ceux qui sont dans la même
+        composante connexe
+        """
+        tops_dict[top] = True
+        for segment in self.vertices[top]:
+            endpointnot = segment.endpoint_not(top)
+            if tops_dict[endpointnot] != True:
+                connected_components.add(endpointnot)
+                connected_components.union(top, endpointnot)
+                self.parcours(endpointnot, tops_dict, connected_components)
 
     def even_degrees(self, hash_points):
         """
@@ -76,15 +113,15 @@ class Graph:
         if hash_points is true then use hashed segments iterator
         else use quadratic segments iterator.
         """
-        if hash_points == True:
+        if hash_points:
             iterator = hashed_iterator(self.vertices.keys())
         else:
             iterator = self.quadratic_iterator()
-        sommets_impairs = list(e for e in self.vertices.values() if len(e) % 2 == 1)
-        impairs = len(sommets_impairs)
+        impairs = sum(1 for e in self.vertices.values() if len(e) % 2 == 1)
         while impairs != 0:
             for segment in iterator:
-                if segment.endpoints[0] in sommets_impairs and segment.endpoints[1] in sommets_impairs:
+                if len(self.vertices[segment.endpoints[0]]) %2 == 1 and \
+                 len(self.vertices[segment.endpoints[1]]) %2 == 1:
                     self.vertices[segment.endpoints[0]].append(segment)
                     self.vertices[segment.endpoints[1]].append(segment)
                     impairs -= 2
