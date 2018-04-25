@@ -14,29 +14,44 @@ def display(filename):
     """
     load segment file, get back connexity, get even degrees, display eulerian path.
     """
-    #seg = []
+    # seg = []
     segments = load_segments(filename)
     # for index, segment in enumerate(segments):
     #     if (index % 8)==0:
     #         seg.append(segment)
     g = Graph(segments)
     tycat(g)
-    #print("{}: nous avons {} segments".format(filename, len(segments)))
-    # t1 = time.clock()
-    # g.reconnect(True)
-    # t2 = time.clock()
-    # tycat(g)
-    # tps = t2 - t1
-    # print("Temps hash:" + str(tps))
-    # g = Graph(segments)
-    # t1 = time.clock()
-    # g.reconnect(False)
-    # t2 = time.clock()
-    # tycat(g)
-    # tps = t2 - t1
-    # print("Temps hash:" + str(tps))
+    print("{}: nous avons {} segments".format(filename, len(segments)))
+    t1 = time.clock()
+    g.reconnect(True)
+    t2 = time.clock()
+    tps = t2 - t1
+    print("Temps reconnect hash:" + str(tps))
+
+    t1 = time.clock()
     g.even_degrees(True)
-    tycat(g,g.eulerian_cycle())
+    t2 = time.clock()
+    tps = t2 - t1
+    print("Temps degré pair hash:" + str(tps))
+
+    g = Graph(segments)
+    t1 = time.clock()
+    g.reconnect(False)
+    t2 = time.clock()
+    tps = t2 - t1
+    print("Temps reconnect quad:" + str(tps))
+
+    t1 = time.clock()
+    g.even_degrees(False)
+    t2 = time.clock()
+    tps = t2 - t1
+    print("Temps degré pair quad:" + str(tps))
+
+    t1 = time.clock()
+    g.eulerian_cycle()
+    t2 = time.clock()
+    tps = t2 - t1
+    print("Temps cycle eulérien:" + str(tps))
 
 def main():
     """
