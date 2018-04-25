@@ -1,11 +1,14 @@
 """
 graph structure
 """
+import copy
 from itertools import chain, combinations
 from geo.hash import hashed_iterator
 from geo.quadrant import Quadrant
 from geo.segment import Segment
 from geo.union import UnionFind
+from geo.tycat import tycat
+
 
 class Graph:
     """
@@ -46,7 +49,8 @@ class Graph:
         for i in range(length):
             for j in range(i + 1, length):
                 segments.append(Segment([points[i], points[j]]))
-        return sorted(segments, key=lambda segment: segment.length())
+        for segment in sorted(segments, key=lambda segment: segment.length()):
+            yield segment
 
     def reconnect(self, hash_points):
         """
@@ -82,13 +86,12 @@ class Graph:
         """
         Retoure l'union find comportant les composantes connexes
         """
-        connected_components = UnionFind()
+        connected_components = UnionFind(self.vertices.keys())
         tops_dict = dict()
         for key in self.vertices.keys():
             tops_dict[key] = False
         top = self.top_not_marked(tops_dict)
         while top is not None:
-            connected_components.add(top)
             self.parcours(top, tops_dict, connected_components)
             top = self.top_not_marked(tops_dict)
         return connected_components
@@ -96,14 +99,12 @@ class Graph:
     def parcours(self, top, tops_dict, connected_components):
         """
         Parcours le graphe à partir d'un sommet et marque les sommets traversés
-        Ajoute chaque sommet à l'unionfind et unit tout ceux qui sont dans la même
-        composante connexe
+        Unit les sommets qui sont dans la même composante dans l'unionfind
         """
         tops_dict[top] = True
         for segment in self.vertices[top]:
             endpointnot = segment.endpoint_not(top)
             if tops_dict[endpointnot] != True:
-                connected_components.add(endpointnot)
                 connected_components.union(top, endpointnot)
                 self.parcours(endpointnot, tops_dict, connected_components)
 
@@ -127,10 +128,40 @@ class Graph:
                     impairs -= 2
 
 
+    def remove_segment(self, top1, top2, vertices):
+        """
+        Remove a segment in vertices of a graph
+        """
+        vertices[top1].remove(Segment([top1, top2]))
+        vertices[top2].remove(Segment([top1, top2]))
 
+
+    def eulerian_cyle_from_top(self, begin, cycle, vertices):
+        """
+        Returns an eulerian cycle from a top
+        """
+        if len(vertices[begin]) == 0:
+            return
+        cycle.append(begin)
+        current = vertices[begin][0].endpoint_not(begin)
+        self.remove_segment(begin, current, vertices)
+        while current != begin:
+            cycle.append(current)
+            previous = current
+            if len(vertices[current]) == 0:
+                return
+            current = vertices[current][0].endpoint_not(current)
+            self.remove_segment(previous, current, vertices)
 
     def eulerian_cycle(self):
         """
         return eulerian cycle. precondition: all degrees are even.
         """
-        pass
+        vertices = copy.deepcopy(self.vertices)
+        begin = list(self.vertices.keys())[0]
+        cycle = []
+        self.eulerian_cyle_from_top(begin, cycle, vertices)
+        if len(cycle) != len(self.vertices):
+            for top in cycle:
+                self.eulerian_cyle_from_top(top, cycle, vertices)
+        return cycle

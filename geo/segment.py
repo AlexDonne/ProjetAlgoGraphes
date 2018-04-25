@@ -94,6 +94,14 @@ class Segment:
     def __hash__(self):
         return hash(tuple(self.endpoints))
 
+    def __eq__(self, other):
+        """
+        Tests if a segment is equal to an other
+        """
+        if (other.endpoints[0] == self.endpoints[0] and other.endpoints[1] == self.endpoints[1]) \
+            or (other.endpoints[1] == self.endpoints[0] \
+            and other.endpoints[0] == self.endpoints[1]):
+            return True
 
 def load_segments(filename):
     """
