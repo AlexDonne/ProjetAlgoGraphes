@@ -2,7 +2,6 @@
 Hash module for the iterator on the hashed segments.
 """
 from geo.segment import Segment
-
 def hashed_segments(points, precision):
     """
     Return hashed tables for a given precision

@@ -2,13 +2,13 @@
 graph structure
 """
 import copy
-from math import sqrt
 from itertools import chain, combinations
 from geo.hash import hashed_iterator
 from geo.quadrant import Quadrant
 from geo.segment import Segment
 from geo.union import UnionFind
-
+from geo.point import Point
+from geo.tycat import tycat
 
 class Graph:
     """
@@ -57,8 +57,10 @@ class Graph:
         Returns the length of the longer possible segment, to start the paving
         """
         quadrant = self.bounding_quadrant()
-        maxlength = sqrt((quadrant.max_coordinates[0] - quadrant.min_coordinates[0])**2 \
-            + (quadrant.max_coordinates[1] - quadrant.min_coordinates[1])**2)
+        point_min = Point(quadrant.min_coordinates)
+        point_max = Point(quadrant.max_coordinates)
+        segmax = Segment([point_min, point_max])
+        maxlength = segmax.length()
         return maxlength
 
     def reconnect(self, hash_points):

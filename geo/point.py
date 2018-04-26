@@ -50,7 +50,7 @@ class Point:
             y3 = ceil((self.coordinates[1] + precision/2)/precision)
             return Point([x3, y3])
         if num == 3:
-            x4 = ceil((self.coordinates[0]+precision/2)/precision)
+            x4 = ceil((self.coordinates[0] + precision/2)/precision)
             y4 = ceil((self.coordinates[1] + precision/2)/precision)
             return Point([x4, y4])
 

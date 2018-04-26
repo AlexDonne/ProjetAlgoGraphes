@@ -3,10 +3,10 @@
 display given segment files
 """
 import sys
+import time
 from geo.segment import load_segments
 from geo.tycat import tycat
 from geo.graph import Graph
-import time
 sys.setrecursionlimit(9000000)
 
 
@@ -33,6 +33,7 @@ def display(filename):
     t2 = time.time()
     tps = t2 - t1
     print("Temps degré pair hash:" + str(tps))
+
     g = Graph(segments)
     t1 = time.time()
     g.reconnect(False)
