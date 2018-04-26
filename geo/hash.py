@@ -19,12 +19,11 @@ def hashed_segments(points, precision):
             tables[i][carre].append(point)
     return tables, collision
 
-def hashed_iterator(points):
+def hashed_iterator(points, precision):
     """
     Returns iterator on the hashed segments
     """
     tables = []
-    precision = 200
     tables_hash, collision = hashed_segments(points, precision)
     tables.append(tables_hash)
     while collision is True:

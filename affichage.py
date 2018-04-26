@@ -22,34 +22,32 @@ def display(filename):
     g = Graph(segments)
     tycat(g)
     print("{}: nous avons {} segments".format(filename, len(segments)))
-    t1 = time.clock()
+    t1 = time.time()
     g.reconnect(True)
-    t2 = time.clock()
+    t2 = time.time()
     tps = t2 - t1
     print("Temps reconnect hash:" + str(tps))
 
-    t1 = time.clock()
+    t1 = time.time()
     g.even_degrees(True)
-    t2 = time.clock()
+    t2 = time.time()
     tps = t2 - t1
     print("Temps degré pair hash:" + str(tps))
-
     g = Graph(segments)
-    t1 = time.clock()
+    t1 = time.time()
     g.reconnect(False)
-    t2 = time.clock()
+    t2 = time.time()
     tps = t2 - t1
     print("Temps reconnect quad:" + str(tps))
 
-    t1 = time.clock()
+    t1 = time.time()
     g.even_degrees(False)
-    t2 = time.clock()
+    t2 = time.time()
     tps = t2 - t1
     print("Temps degré pair quad:" + str(tps))
-
-    t1 = time.clock()
+    t1 = time.time()
     g.eulerian_cycle()
-    t2 = time.clock()
+    t2 = time.time()
     tps = t2 - t1
     print("Temps cycle eulérien:" + str(tps))
 

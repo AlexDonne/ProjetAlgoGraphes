@@ -2,12 +2,12 @@
 graph structure
 """
 import copy
+from math import sqrt
 from itertools import chain, combinations
 from geo.hash import hashed_iterator
 from geo.quadrant import Quadrant
 from geo.segment import Segment
 from geo.union import UnionFind
-from geo.tycat import tycat
 
 
 class Graph:
@@ -52,6 +52,15 @@ class Graph:
         for segment in sorted(segments, key=lambda segment: segment.length()):
             yield segment
 
+    def get_first_precision(self):
+        """
+        Returns the length of the longer possible segment, to start the paving
+        """
+        quadrant = self.bounding_quadrant()
+        maxlength = sqrt((quadrant.max_coordinates[0] - quadrant.min_coordinates[0])**2 \
+            + (quadrant.max_coordinates[1] - quadrant.min_coordinates[1])**2)
+        return maxlength
+
     def reconnect(self, hash_points):
         """
         greedily add edges until graph is fully connected.
@@ -59,7 +68,7 @@ class Graph:
         else use quadratic segments iterator.
         """
         if hash_points:
-            iterator = hashed_iterator(self.vertices.keys())
+            iterator = hashed_iterator(self.vertices.keys(), self.get_first_precision())
         else:
             iterator = self.quadratic_iterator()
         connected_components = self.connected_components()
@@ -115,7 +124,7 @@ class Graph:
         else use quadratic segments iterator.
         """
         if hash_points:
-            iterator = hashed_iterator(self.vertices.keys())
+            iterator = hashed_iterator(self.vertices.keys(), self.get_first_precision())
         else:
             iterator = self.quadratic_iterator()
         impairs = sum(1 for e in self.vertices.values() if len(e) % 2 == 1)
