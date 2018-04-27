@@ -61,7 +61,7 @@ class Graph:
         point_max = Point(quadrant.max_coordinates)
         segmax = Segment([point_min, point_max])
         maxlength = segmax.length()
-        return maxlength
+        return 2*maxlength
 
     def reconnect(self, hash_points):
         """
@@ -74,6 +74,9 @@ class Graph:
         else:
             iterator = self.quadratic_iterator()
         connected_components = self.connected_components()
+        # Ligne du dessous à décommenter pour utiliser notre algo optimisé
+        # return
+        #Algo DEMANDE
         if len(connected_components) == 1:
             return
         for segment in iterator:
@@ -99,14 +102,22 @@ class Graph:
         """
         Retoure l'union find comportant les composantes connexes
         """
+        tops_separed = []
         connected_components = UnionFind(self.vertices.keys())
         tops_dict = dict()
         for key in self.vertices.keys():
             tops_dict[key] = False
         top = self.top_not_marked(tops_dict)
+        tops_separed.append(top)
         while top is not None:
             self.parcours(top, tops_dict, connected_components)
             top = self.top_not_marked(tops_dict)
+            tops_separed.append(top)
+        top_first = tops_separed[0]
+        # A décommenter pour utiliser notre algo optimisé
+        # for i in range(1, len(tops_separed)-1):
+        #     self.vertices[top_first].append(Segment([top_first,tops_separed[i]]))
+        #     self.vertices[tops_separed[i]].append(Segment([top_first,tops_separed[i]]))
         return connected_components
 
     def parcours(self, top, tops_dict, connected_components):
@@ -131,15 +142,25 @@ class Graph:
             iterator = ordered_segments(self.vertices.keys(), self.get_first_precision())
         else:
             iterator = self.quadratic_iterator()
-        impairs = sum(1 for e in self.vertices.values() if len(e) % 2 == 1)
+        sommets_impairs = []
+        impairs = 0
+        for top in self.vertices.keys():
+            if len(self.vertices[top]) % 2 == 1:
+                impairs += 1
+                sommets_impairs.append(top)
+        # Algo optimisé en dessous, pour l'utiliser décomment code ci-dessous
+        # for i in range(0, len(sommets_impairs), 2):
+        #     new = Segment([sommets_impairs[i], sommets_impairs[i+1]])
+        #     self.vertices[sommets_impairs[i]].append(new)
+        #     self.vertices[sommets_impairs[i+1]].append(new)
+            # ALGO demandé, à commenter pour utiliser l'algo optimisé
         while impairs != 0:
             segment = next(iterator)
             if len(self.vertices[segment.endpoints[0]]) %2 == 1 and \
-            len(self.vertices[segment.endpoints[1]]) %2 == 1:
+                len(self.vertices[segment.endpoints[1]]) %2 == 1:
                 self.vertices[segment.endpoints[0]].append(segment)
                 self.vertices[segment.endpoints[1]].append(segment)
                 impairs -= 2
-
 
     def remove_segment(self, top1, top2, vertices):
         """

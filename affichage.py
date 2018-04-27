@@ -56,9 +56,3 @@ def main():
         display(filename)
 
 main()
-
-
-# for top in self.vertices.keys():
-#     for segment in self.vertices[top]:
-#         connected_components.union(top, segment.endpoint_not(top))
-# return connected_components
