@@ -14,11 +14,7 @@ def display(filename):
     """
     load segment file, get back connexity, get even degrees, display eulerian path.
     """
-    # seg = []
     segments = load_segments(filename)
-    # for index, segment in enumerate(segments):
-    #     if (index % 8)==0:
-    #         seg.append(segment)
     g = Graph(segments)
     tycat(g)
     print("{}: nous avons {} segments".format(filename, len(segments)))
@@ -27,7 +23,7 @@ def display(filename):
     t2 = time.time()
     tps = t2 - t1
     print("Temps reconnect hash:" + str(tps))
-
+    tycat(g)
     t1 = time.time()
     g.even_degrees(True)
     t2 = time.time()
@@ -64,7 +60,5 @@ main()
 
 # for top in self.vertices.keys():
 #     for segment in self.vertices[top]:
-#         I += 1
 #         connected_components.union(top, segment.endpoint_not(top))
-# print(str(I))
 # return connected_components

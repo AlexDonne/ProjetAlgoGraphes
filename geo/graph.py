@@ -3,7 +3,7 @@ graph structure
 """
 import copy
 from itertools import chain, combinations
-from geo.hash import hashed_iterator
+from geo.hash import ordered_segments
 from geo.quadrant import Quadrant
 from geo.segment import Segment
 from geo.union import UnionFind
@@ -70,10 +70,12 @@ class Graph:
         else use quadratic segments iterator.
         """
         if hash_points:
-            iterator = hashed_iterator(self.vertices.keys(), self.get_first_precision())
+            iterator = ordered_segments(self.vertices.keys(), self.get_first_precision())
         else:
             iterator = self.quadratic_iterator()
         connected_components = self.connected_components()
+        if len(connected_components) == 1:
+            return
         for segment in iterator:
             compp1 = connected_components.find(segment.endpoints[0])
             compp2 = connected_components.find(segment.endpoints[1])
@@ -126,17 +128,17 @@ class Graph:
         else use quadratic segments iterator.
         """
         if hash_points:
-            iterator = hashed_iterator(self.vertices.keys(), self.get_first_precision())
+            iterator = ordered_segments(self.vertices.keys(), self.get_first_precision())
         else:
             iterator = self.quadratic_iterator()
         impairs = sum(1 for e in self.vertices.values() if len(e) % 2 == 1)
         while impairs != 0:
-            for segment in iterator:
-                if len(self.vertices[segment.endpoints[0]]) %2 == 1 and \
-                 len(self.vertices[segment.endpoints[1]]) %2 == 1:
-                    self.vertices[segment.endpoints[0]].append(segment)
-                    self.vertices[segment.endpoints[1]].append(segment)
-                    impairs -= 2
+            segment = next(iterator)
+            if len(self.vertices[segment.endpoints[0]]) %2 == 1 and \
+            len(self.vertices[segment.endpoints[1]]) %2 == 1:
+                self.vertices[segment.endpoints[0]].append(segment)
+                self.vertices[segment.endpoints[1]].append(segment)
+                impairs -= 2
 
 
     def remove_segment(self, top1, top2, vertices):

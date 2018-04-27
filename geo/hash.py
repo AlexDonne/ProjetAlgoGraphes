@@ -11,21 +11,19 @@ def hashed_segments(points, precision):
     for point in points:
         for i in range(4):
             carre = point.hasher(precision, i)
-            if carre not in tables[i]:
-                tables[i][carre] = []
-            else:
+            tables[i].setdefault(carre, []).append(point)
+            if len(tables[i][carre]) > 1:
                 collision = True
-            tables[i][carre].append(point)
     return tables, collision
 
-def hashed_iterator(points, precision):
+def ordered_segments(points, precision):
     """
     Returns iterator on the hashed segments
     """
     tables = []
     tables_hash, collision = hashed_segments(points, precision)
     tables.append(tables_hash)
-    while collision is True:
+    while collision:
         precision = precision/2
         tables_hash, collision = hashed_segments(points, precision)
         tables.append(tables_hash)
