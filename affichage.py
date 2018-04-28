@@ -23,7 +23,7 @@ def display(filename):
     t2 = time.time()
     tps = t2 - t1
     print("Temps reconnect hash:" + str(tps))
-    tycat(g)
+
     t1 = time.time()
     g.even_degrees(True)
     t2 = time.time()

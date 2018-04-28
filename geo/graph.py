@@ -39,16 +39,15 @@ class Graph:
         edges = (e for (p, edges) in self.vertices.items() for e in edges if e.endpoints[0] == p)
         return "\n".join(c.svg_content() for c in chain(self.vertices.keys(), edges))
 
-    def quadratic_iterator(self):
+    def quadratic_iterator(self, tops):
         """
         Iterator on a quadratic number of segments
         """
-        points = list(self.vertices.keys())
         segments = []
-        length = len(self.vertices)
+        length = len(tops)
         for i in range(length):
             for j in range(i + 1, length):
-                segments.append(Segment([points[i], points[j]]))
+                segments.append(Segment([tops[i], tops[j]]))
         for segment in sorted(segments, key=lambda segment: segment.length()):
             yield segment
 
@@ -72,7 +71,7 @@ class Graph:
         if hash_points:
             iterator = ordered_segments(self.vertices.keys(), self.get_first_precision())
         else:
-            iterator = self.quadratic_iterator()
+            iterator = self.quadratic_iterator(list(self.vertices.keys()))
         connected_components = self.connected_components()
         # Ligne du dessous à décommenter pour utiliser notre algo optimisé
         # return
@@ -138,22 +137,20 @@ class Graph:
         if hash_points is true then use hashed segments iterator
         else use quadratic segments iterator.
         """
-        if hash_points:
-            iterator = ordered_segments(self.vertices.keys(), self.get_first_precision())
-        else:
-            iterator = self.quadratic_iterator()
         sommets_impairs = []
         impairs = 0
         for top in self.vertices.keys():
             if len(self.vertices[top]) % 2 == 1:
                 impairs += 1
                 sommets_impairs.append(top)
-        # Algo optimisé en dessous, pour l'utiliser décomment code ci-dessous
-        # for i in range(0, len(sommets_impairs), 2):
-        #     new = Segment([sommets_impairs[i], sommets_impairs[i+1]])
-        #     self.vertices[sommets_impairs[i]].append(new)
-        #     self.vertices[sommets_impairs[i+1]].append(new)
-            # ALGO demandé, à commenter pour utiliser l'algo optimisé
+        if hash_points:
+            #décommenter en dessous et commenter celle d'après pour optimisation
+            # iterator = ordered_segments(sommets_impairs, self.get_first_precision())
+            iterator = ordered_segments(self.vertices.keys(), self.get_first_precision())
+        else:
+            # décommenter en dessous et commenter celle d'après pour optimisation
+            # iterator = self.quadratic_iterator(sommets_impairs)
+            iterator = self.quadratic_iterator(list(self.vertices.keys()))
         while impairs != 0:
             segment = next(iterator)
             if len(self.vertices[segment.endpoints[0]]) %2 == 1 and \
