@@ -17,6 +17,7 @@ class Graph:
     """
     def __init__(self, segments):
         self.vertices = dict()
+        self.nbsegments = len(segments)
         for segment in segments:
             for point in segment.endpoints:
                 if point not in self.vertices:
@@ -73,7 +74,7 @@ class Graph:
         else:
             iterator = self.quadratic_iterator(list(self.vertices.keys()))
         connected_components = self.connected_components()
-        # Ligne du dessous à décommenter pour utiliser notre algo optimisé
+        # Ligne du dessous à décommenter pour utiliser notre algo optimisé, décommenter aussi dans connected_components
         # return
         #Algo DEMANDE
         if len(connected_components) == 1:
@@ -84,6 +85,7 @@ class Graph:
             if compp1 != compp2:
                 self.vertices[segment.endpoints[0]].append(segment)
                 self.vertices[segment.endpoints[1]].append(segment)
+                self.nbsegments += 1
                 connected_components.union(compp1, compp2)
             if len(connected_components) == 1:
                 return
@@ -157,32 +159,34 @@ class Graph:
                 len(self.vertices[segment.endpoints[1]]) %2 == 1:
                 self.vertices[segment.endpoints[0]].append(segment)
                 self.vertices[segment.endpoints[1]].append(segment)
+                self.nbsegments += 1
                 impairs -= 2
 
-    def remove_segment(self, top1, top2, vertices):
+    def remove_segment_and_save_it(self, top1, top2, vertices, cycle):
         """
-        Remove a segment in vertices of a graph
+        Remove a segment in vertices of a graph and add it in the cycle of segments
         """
+        cycle.append(Segment([top1, top2]))
         vertices[top1].remove(Segment([top1, top2]))
         vertices[top2].remove(Segment([top1, top2]))
 
 
-    def eulerian_cyle_from_top(self, begin, cycle, vertices):
+    def eulerian_cyle_from_top(self, begin, cycle_tops, cycle_segs, vertices):
         """
         Returns an eulerian cycle from a top
         """
         if len(vertices[begin]) == 0:
             return
-        cycle.append(begin)
+        cycle_tops.append(begin)
         current = vertices[begin][0].endpoint_not(begin)
-        self.remove_segment(begin, current, vertices)
+        self.remove_segment_and_save_it(begin, current, vertices, cycle_segs)
         while current != begin:
-            cycle.append(current)
+            cycle_tops.append(current)
             previous = current
             if len(vertices[current]) == 0:
                 return
             current = vertices[current][0].endpoint_not(current)
-            self.remove_segment(previous, current, vertices)
+            self.remove_segment_and_save_it(previous, current, vertices, cycle_segs)
 
     def eulerian_cycle(self):
         """
@@ -190,9 +194,10 @@ class Graph:
         """
         vertices = copy.deepcopy(self.vertices)
         begin = list(self.vertices.keys())[0]
-        cycle = []
-        self.eulerian_cyle_from_top(begin, cycle, vertices)
-        if len(cycle) != len(self.vertices):
-            for top in cycle:
-                self.eulerian_cyle_from_top(top, cycle, vertices)
-        return cycle
+        cycle_segs = []
+        cycle_tops = []
+        self.eulerian_cyle_from_top(begin, cycle_tops, cycle_segs, vertices)
+        while len(cycle_segs) != self.nbsegments:
+            for top in cycle_tops:
+                self.eulerian_cyle_from_top(top, cycle_tops, cycle_segs, vertices)
+        return cycle_segs
